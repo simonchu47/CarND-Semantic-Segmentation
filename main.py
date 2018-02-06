@@ -100,7 +100,9 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     logits_labels = tf.reshape(correct_label, [-1, num_classes])
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=logits_labels, logits=logits)
     cross_entropy_loss = tf.reduce_mean(cross_entropy)
-    optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate)
+    #beta1 = tf.Variable(0.9)
+    #beta2 = tf.Variable(0.999)
+    optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate, beta1 = 0.9, beta2 = 0.999)
     train_op = optimizer.minimize(cross_entropy_loss)
     return logits, train_op, cross_entropy_loss
 
@@ -129,7 +131,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
 
     for epoch in range(epochs):
         for image, label in get_batches_fn(batch_size): 
-            sess.run(train_op, feed_dict={input_image: image, correct_label: label})
+            sess.run(train_op, feed_dict={input_image: image, correct_label: label, keep_prob: 0.5})
         #sess.run(iou_op)
         #print("Mean IoU =", sess.run(iou))
             
@@ -152,7 +154,8 @@ def run():
 
     correct_label = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], 2))
     input_image = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], 3))
-    
+    keep_prob = tf.placeholder(tf.float32)
+
     # Download pretrained vgg model
     helper.maybe_download_pretrained_vgg(data_dir)
 
@@ -161,8 +164,13 @@ def run():
     #  https://www.cityscapes-dataset.com/
 
     with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        
+        #sess.run(tf.global_variables_initializer())
+
+        sess.run(tf.initialize_all_variables()) 
+
+        #sess.run(sess.graph.get_tensor_by_name('beta1_power/Assign:0'))
+        #sess.run(sess.graph.get_tensor_by_name('beta2_power/Assign:0'))
+
         # Path to vgg model
         vgg_path = os.path.join(data_dir, 'vgg')
         # Create function to get batches
