@@ -57,26 +57,25 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # TODO: Implement function
     conv_1x1 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, strides=(1,1), padding='same',
                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
-    #print(vgg_layer4_out.get_shape())
     
     output = tf.layers.conv2d_transpose(conv_1x1, num_classes, 4, strides=(2, 2), padding='same',
                                         kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
-    #print(output.get_shape())
 
-    pool4 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, strides=(1,1), padding='same',
+    vgg_layer4_out_scaled = tf.multiply(vgg_layer4_out, 0.01, name='vgg_layer4_out_scaled')
+
+    pool4 = tf.layers.conv2d(vgg_layer4_out_scaled, num_classes, 1, strides=(1,1), padding='same',
                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
-
-    #output_1 = tf.add(output, vgg_layer4_out)
     output_1 = tf.add(output, pool4)
 
     output_2 = tf.layers.conv2d_transpose(output_1, num_classes, 4, strides=(2, 2), padding='same',
                                         kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
-    pool_3 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, strides=(1,1), padding='same',
+    vgg_layer3_out_scaled = tf.multiply(vgg_layer3_out, 0.0001, name='vgg_layer3_out_scaled')
+
+    pool_3 = tf.layers.conv2d(vgg_layer3_out_scaled, num_classes, 1, strides=(1,1), padding='same',
                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
-    #output_3 = tf.add(output_2, vgg_layer3_out)
     output_3 = tf.add(output_2, pool_3)
 
     output_4 = tf.layers.conv2d_transpose(output_3, num_classes, 16, strides=(8, 8), padding='same',
@@ -100,6 +99,9 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     logits_labels = tf.reshape(correct_label, [-1, num_classes])
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=logits_labels, logits=logits)
     cross_entropy_loss = tf.reduce_mean(cross_entropy)
+    reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    reg_constant = 0.01
+    cross_entropy_loss = cross_entropy_loss + reg_constant*sum(reg_losses)
     #beta1 = tf.Variable(0.9)
     #beta2 = tf.Variable(0.999)
     optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate, beta1 = 0.9, beta2 = 0.999)
@@ -130,10 +132,12 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     #sess.run(tf.local_variables_initializer())
 
     for epoch in range(epochs):
+        print("Epoch {}...".format(epoch))
         for image, label in get_batches_fn(batch_size): 
             sess.run(train_op, feed_dict={input_image: image, correct_label: label, keep_prob: 0.5})
         #sess.run(iou_op)
         #print("Mean IoU =", sess.run(iou))
+        print("The cross_entropy_loss is {}".format(cross_entropy_loss))
             
 tests.test_train_nn(train_nn)
 
