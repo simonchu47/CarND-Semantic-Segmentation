@@ -134,10 +134,10 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     for epoch in range(epochs):
         print("Epoch {}...".format(epoch))
         for image, label in get_batches_fn(batch_size): 
-            sess.run(train_op, feed_dict={input_image: image, correct_label: label, keep_prob: 0.5})
-        #sess.run(iou_op)
-        #print("Mean IoU =", sess.run(iou))
-        print("The cross_entropy_loss is {}".format(cross_entropy_loss))
+            _, loss = sess.run([train_op, cross_entropy_loss], feed_dict={input_image: image, correct_label: label, keep_prob: 0.5, learning_rate: 0.0001})
+            #sess.run(iou_op)
+            #print("Mean IoU =", sess.run(iou))
+            print("The loss is {}".format(loss))
             
 tests.test_train_nn(train_nn)
 
@@ -153,12 +153,13 @@ def run():
     runs_dir = './runs'
     tests.test_for_kitti_dataset(data_dir)
     learning_rate = 0.001
-    epochs = 20
-    batch_size = 128
+    epochs = 200
+    batch_size = 16
 
     correct_label = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], 2))
     input_image = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], 3))
     keep_prob = tf.placeholder(tf.float32)
+    learning_rate = tf.placeholder(tf.float32)
 
     # Download pretrained vgg model
     helper.maybe_download_pretrained_vgg(data_dir)
