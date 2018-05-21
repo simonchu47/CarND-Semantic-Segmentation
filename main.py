@@ -147,16 +147,16 @@ def mean_iou(ground_truth, prediction, num_classes):
     return iou, iou_op
 
 def run():
-    num_classes = 2
-    image_shape = (160, 576)
+    num_classes = 13
+    image_shape = (600, 800)
     data_dir = './data'
     runs_dir = './runs'
-    tests.test_for_kitti_dataset(data_dir)
+    #tests.test_for_kitti_dataset(data_dir)
     learning_rate = 0.001
     epochs = 200
     batch_size = 16
 
-    correct_label = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], 2))
+    correct_label = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], num_classes))
     input_image = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], 3))
     keep_prob = tf.placeholder(tf.float32)
     learning_rate = tf.placeholder(tf.float32)
@@ -179,7 +179,7 @@ def run():
         # Path to vgg model
         vgg_path = os.path.join(data_dir, 'vgg')
         # Create function to get batches
-        get_batches_fn = helper.gen_batch_function(os.path.join(data_dir, 'data_road/training'), image_shape)
+        get_batches_fn = helper.gen_batch_function(os.path.join(data_dir, 'training'), image_shape, num_classes)
 
         # OPTIONAL: Augment Images for better results
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
