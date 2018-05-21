@@ -1,0 +1,11 @@
+name: tensorflow-sementic-segmentation
+channels:
+    - https://conda.anaconda.org/menpo
+    - conda-forge
+dependencies:
+    - python==3.5
+    - numpy
+    - scipy
+    - pip:
+        - tensorflow-gpu==1.4.0
+        - tensorflow-tensorboard
