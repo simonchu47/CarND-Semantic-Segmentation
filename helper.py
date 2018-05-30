@@ -101,7 +101,19 @@ def gen_batch_function(data_folder, image_shape, num_classes):
                 gt_bg = np.zeros(gt_image_shape, dtype=bool)
                 for y in range(image.shape[0]):
                     for x in range(image.shape[1]):
-                        gt_bg[y][x][gt_image[y][x][0]] = True
+                        #gt_bg[y][x][gt_image[y][x][0]] = True
+                        if gt_image[y][x][0] == 6:
+                            gt_bg[y][x][1] = True
+                        elif gt_image[y][x][0] == 7:
+                            gt_bg[y][x][1] = True
+                        elif gt_image[y][x][0] == 10:
+                            #if y < image.shape[0]*2/3:
+                            if y < 496:
+                                gt_bg[y][x][2] = True
+                            else:
+                                gt_bg[y][x][0] = True
+                        else:
+                            gt_bg[y][x][0] = True
                 
                 images.append(image)
                 #gt_images.append(gt_image)

@@ -147,14 +147,16 @@ def mean_iou(ground_truth, prediction, num_classes):
     return iou, iou_op
 
 def run():
-    num_classes = 13
-    image_shape = (600, 800)
+    num_classes = 3
+    #image_shape = (160, 576)
+    image_shape = (608, 800)
+    #image_shape = (150, 200)
     data_dir = './data'
     runs_dir = './runs'
     #tests.test_for_kitti_dataset(data_dir)
     learning_rate = 0.001
     epochs = 200
-    batch_size = 16
+    batch_size = 4
 
     correct_label = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], num_classes))
     input_image = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], 3))
