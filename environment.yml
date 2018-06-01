@@ -6,6 +6,8 @@ dependencies:
     - python==3.5
     - numpy
     - scipy
+    - tqdm
+    - Pillow
     - pip:
-        - tensorflow-gpu==1.4.0
+        - tensorflow-gpu==1.3.0
         - tensorflow-tensorboard
