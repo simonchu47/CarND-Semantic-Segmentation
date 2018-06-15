@@ -80,8 +80,10 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
 
     output_4 = tf.layers.conv2d_transpose(output_3, num_classes, 16, strides=(8, 8), padding='same',
                                         kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
-        
-    return output_4
+
+    output_4_scaled = tf.multiply(output_4, 1, name='seg_final_output')
+   
+    return output_4_scaled
 tests.test_layers(layers)
 
 
@@ -149,14 +151,15 @@ def mean_iou(ground_truth, prediction, num_classes):
 def run():
     num_classes = 3
     #image_shape = (160, 576)
-    image_shape = (608, 800)
+    #image_shape = (608, 800)
+    image_shape = (192, 256)
     #image_shape = (150, 200)
     data_dir = './data'
     runs_dir = './runs'
     #tests.test_for_kitti_dataset(data_dir)
     learning_rate = 0.001
-    epochs = 200
-    batch_size = 4
+    epochs = 20
+    batch_size = 8
 
     correct_label = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], num_classes))
     input_image = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], 3))

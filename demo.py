@@ -71,12 +71,15 @@ if tf.saved_model.loader.maybe_saved_model_directory(model_save):
             
             road_im = scipy.misc.toimage(rgb_frame_scaled)
             road_im.paste(road_mask, box=None, mask=road_mask)
+            road_im = scipy.misc.imresize(road_im, original_image_shape)
             
             car_im = scipy.misc.toimage(rgb_frame_scaled)
             car_im.paste(car_mask, box=None, mask=car_mask)
+            car_im = scipy.misc.imresize(car_im, original_image_shape)
             
             road_im_path = "road_" + str(frame) + ".png"
             car_im_path = "car_" + str(frame) + ".png"
+            
             scipy.misc.imsave(road_im_path, np.array(road_im))
             scipy.misc.imsave(car_im_path, np.array(car_im))
             
