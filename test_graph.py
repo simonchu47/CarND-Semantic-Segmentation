@@ -14,6 +14,11 @@ import tensorflow as tf
 
 file = sys.argv[-1]
 
+myname = __file__
+if file == myname:
+  print ("Error loading graph")
+  quit
+  
 def load_graph(graph_file, use_xla=False):
     jit_level = 0
     config = tf.ConfigProto()
