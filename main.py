@@ -114,7 +114,7 @@ tests.test_optimize(optimize)
 
 
 def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image,
-             correct_label, keep_prob, learning_rate):
+             correct_label, keep_prob, learning_rate, saver=None):
     """
     Train neural network and print out the loss during training.
     :param sess: TF Session
@@ -127,6 +127,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     :param correct_label: TF Placeholder for label images
     :param keep_prob: TF Placeholder for dropout keep probability
     :param learning_rate: TF Placeholder for learning rate
+    :param saver: save the state
     """
     # TODO: Implement function
 
@@ -140,6 +141,9 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
             #sess.run(iou_op)
             #print("Mean IoU =", sess.run(iou))
             print("The loss is {}".format(loss))
+
+            if saver:
+                saver.save(sess, "./ckpts/model.ckpt", global_step=epoch)
             
 tests.test_train_nn(train_nn)
 
@@ -158,7 +162,7 @@ def run():
     runs_dir = './runs'
     #tests.test_for_kitti_dataset(data_dir)
     learning_rate = 0.001
-    epochs = 20
+    epochs = 2
     batch_size = 8
 
     correct_label = tf.placeholder(tf.float32, (None, image_shape[0], image_shape[1], num_classes))
@@ -199,16 +203,28 @@ def run():
         # TODO: Train NN using the train_nn function
         sess.run(tf.global_variables_initializer())
 
-        train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image,
-             correct_label, keep_prob, learning_rate)
+        saver = tf.train.Saver(max_to_keep=2, keep_checkpoint_every_n_hours=1)
+        restore_path = tf.train.latest_checkpoint('./ckpts/')
+        if restore_path:
+            print("Resotring model from: %s " % restore_path)
+            saver.restore(sess, restore_path)
 
+
+        train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image,
+             correct_label, keep_prob, learning_rate, saver)
+
+        """
         model_save = "saved_model_" + str(epochs)
         builder = tf.saved_model.builder.SavedModelBuilder(model_save)
         builder.add_meta_graph_and_variables(sess, ["vgg16_semantic"])
         builder.save()
+        """
+        print("Saving graph...")
+        # Save GraphDef
+        tf.train.write_graph(sess.graph_def,'.','graph.pb', as_text=False)
         
         # TODO: Save inference data using helper.save_inference_samples
-        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        #helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
         # OPTIONAL: Apply the trained model to a video
 
